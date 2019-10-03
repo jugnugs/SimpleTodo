@@ -34,6 +34,10 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 Describe any challenges encountered while building the app.
 
+The biggest challenge for me was understanding how exactly each component of the application interacted with each other. For instance, I understand the general function of the Adapter and View, but it is difficult to wrap my head around how exactly the adapter connects the data model to view. I will need to review this on my own time.
+
+Additionally, getting familiar with Android Studio and its integrated tools/libraries has been overwhelming, but not impossible. I understand the basics of Java object oriented programming but this application definitely takes the difficulty up a level with all of the program components interacting with each other in complicated ways.
+
 ## License
 
     Copyright [yyyy] [name of copyright owner]
