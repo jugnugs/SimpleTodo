@@ -1,9 +1,11 @@
 package com.example.simpletodo;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Button;
+import android.widget.CheckBox;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,21 +16,39 @@ import java.util.List;
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> {
 
     public interface OnClickListener {
-        void onItemClicked(int position);
+        void onItemClicked(int position, View view, Button done, Button edit, Button delete);
     }
 
-    public interface OnLongClickListener {
-        void onItemLongClicked(int position);
+    public interface OnDoneClickListener {
+        void onDoneClicked(int position);
     }
 
-    List<String> items;
-    OnLongClickListener longClickListener;
-    OnClickListener clickListener;
+    public interface OnEditClickListener {
+        void onEditClicked(int position, String text);
+    }
 
-    public ItemsAdapter(List<String> items, OnLongClickListener longClickListener, OnClickListener clickListener) {
+    public interface OnDeleteClickListener {
+        void onDeleteClicked(int position);
+    }
+
+    private static final String TAG = "ItemsAdapter";
+
+    private List<String> items;
+    private OnClickListener clickListener;
+    private OnDoneClickListener doneClickListener;
+    private OnEditClickListener editClickListener;
+    private OnDeleteClickListener deleteClickListener;
+
+    ItemsAdapter(List<String> items,
+                 OnClickListener clickListener,
+                 OnDoneClickListener doneClickListener,
+                 OnEditClickListener editClickListener,
+                 OnDeleteClickListener deleteClickListener) {
         this.items = items;
-        this.longClickListener = longClickListener;
         this.clickListener = clickListener;
+        this.doneClickListener = doneClickListener;
+        this.editClickListener = editClickListener;
+        this.deleteClickListener = deleteClickListener;
     }
 
     @NonNull
@@ -36,7 +56,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // Use layout inflater to inflate a view
 
-        View todoView = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
+        View todoView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout, parent, false);
         // wrap it inside a View Holder and return it
         return new ViewHolder(todoView);
     }
@@ -59,28 +79,47 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
     // Container to provide easy access to views that represent each row in the list
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        TextView tvItem;
+        CheckBox btnCheck;
+        Button btnDone;
+        Button btnEdit;
+        Button btnDelete;
 
-        public ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvItem = itemView.findViewById(android.R.id.text1);
+            btnCheck = itemView.findViewById(R.id.tvCheckBox);
+            btnDone = itemView.findViewById(R.id.btnDone);
+            btnEdit = itemView.findViewById(R.id.btnEdit);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
         }
 
         // Update the view inside of the view holder with this data
-        public void bind(String item) {
-            tvItem.setText(item);
-            tvItem.setOnClickListener(new View.OnClickListener() {
+        void bind(String item) {
+            btnCheck.setText(item);
+            btnCheck.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    clickListener.onItemClicked(getAdapterPosition());
+                    clickListener.onItemClicked(getAdapterPosition(), btnCheck, btnDone, btnDelete, btnEdit);
                 }
             });
-            tvItem.setOnLongClickListener(new View.OnLongClickListener() {
+            btnDone.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public boolean onLongClick(View v) {
-                    // Notify the listener which position was long pressed
-                    longClickListener.onItemLongClicked(getAdapterPosition());
-                    return true;
+                public void onClick(View v) {
+                    Log.i(TAG, "Done!");
+                    doneClickListener.onDoneClicked(getAdapterPosition());
+                }
+            });
+            btnEdit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.i(TAG, "Edit");
+                    editClickListener.onEditClicked(getAdapterPosition(), btnCheck.getText().toString());
+                }
+            });
+            btnDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.i(TAG, "Delete");
+                    deleteClickListener.onDeleteClicked(getAdapterPosition());
                 }
             });
         }

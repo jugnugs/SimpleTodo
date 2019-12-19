@@ -1,11 +1,21 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
+
+    <style name="CustomCheckBox" parent="android:style/Widget.Holo.Light.CompoundButton.CheckBox">
+        <item name="android:buttonTint" tools:targetApi="lollipop">@color/primaryText</item>
+    </style>
+
+    <style name="Title" parent="TextAppearance.AppCompat">
+        <item name="android:typeface">sans</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+    </style>
+
 
 </resources>

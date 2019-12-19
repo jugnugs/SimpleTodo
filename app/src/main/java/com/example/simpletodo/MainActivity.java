@@ -1,17 +1,20 @@
 package com.example.simpletodo;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.content.Intent;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.apache.commons.io.FileUtils;
 
@@ -23,14 +26,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String KEY_ITEM_TEXT = "item_text";
-    public static final String KEY_ITEM_POSITION = "item_position";
-    public static final int EDIT_TEXT_CODE = 20;
+    private static final String TAG = "MainActivity";
 
     List<String> items;
 
-    Button btnAdd;
-    EditText edtItem;
+    ImageButton btnAdd;
     RecyclerView rvItems;
     ItemsAdapter itemsAdapter;
 
@@ -39,77 +39,149 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // set toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("");
+        setSupportActionBar(toolbar);
+
         btnAdd = findViewById(R.id.btnAdd);
-        edtItem = findViewById(R.id.edtItem);
         rvItems = findViewById(R.id.rvItems);
 
         loadItems();
 
-        ItemsAdapter.OnLongClickListener onLongClickListener = new ItemsAdapter.OnLongClickListener() {
-            @Override
-            public void onItemLongClicked(int position) {
-                // Delete the item from the model
-                items.remove(position);
-                // Notify the adapter
-                itemsAdapter.notifyItemRemoved(position);
-                Toast.makeText(getApplicationContext(), "Item was removed", Toast.LENGTH_SHORT).show();
-                saveItems();
-            }
-        };
-
         ItemsAdapter.OnClickListener onClickListener = new ItemsAdapter.OnClickListener() {
             @Override
-            public void onItemClicked(int position) {
-                Log.d("MainActivity", "Single click at position " + position);
-                // create the new activity
-                Intent i = new Intent(MainActivity.this, EditActivity.class);
-                // pass the data being edited
-                i.putExtra(KEY_ITEM_TEXT, items.get(position));
-                i.putExtra(KEY_ITEM_POSITION, position);
-                // display the activity
-                startActivityForResult(i, EDIT_TEXT_CODE);
+            public void onItemClicked(int position, View view, Button done, Button edit, Button delete) {
+                Log.d(TAG, "Single click at position " + position);
+                Log.i(TAG, "Checkbox clicked!");
+                boolean checked = ((CheckBox) view).isChecked();
+
+                // make buttons visible when checked
+                if (checked) {
+                    done.setVisibility(View.VISIBLE);
+                    edit.setVisibility(View.VISIBLE);
+                    delete.setVisibility(View.VISIBLE);
+                }
+                else {
+                    done.setVisibility(View.INVISIBLE);
+                    edit.setVisibility(View.INVISIBLE);
+                    delete.setVisibility(View.INVISIBLE);
+                }
             }
         };
 
-        itemsAdapter = new ItemsAdapter(items, onLongClickListener, onClickListener);
+        ItemsAdapter.OnDoneClickListener onDoneClickListener = new ItemsAdapter.OnDoneClickListener() {
+            @Override
+            public void onDoneClicked(int position) {
+                remove(position);
+                Toast.makeText(getApplicationContext(), "Task completed!", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        ItemsAdapter.OnEditClickListener onEditClickListener = new ItemsAdapter.OnEditClickListener() {
+            @Override
+            public void onEditClicked(int position, String text) {
+                onEditClick(position, text);
+            }
+        };
+
+        ItemsAdapter.OnDeleteClickListener onDeleteClickListener = new ItemsAdapter.OnDeleteClickListener() {
+            @Override
+            public void onDeleteClicked(int position) {
+                remove(position);
+                Toast.makeText(getApplicationContext(), "Item was removed", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        itemsAdapter = new ItemsAdapter(items, onClickListener, onDoneClickListener, onEditClickListener, onDeleteClickListener);
         rvItems.setAdapter(itemsAdapter);
         rvItems.setLayoutManager(new LinearLayoutManager( this));
 
+
+
+        // on add button click, pop up dialog
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String todoItem = edtItem.getText().toString();
-                // Add item to the model
-                items.add(todoItem);
-                // Notify the adapter that an item is inserted
-                itemsAdapter.notifyItemInserted(items.size() - 1);
-                edtItem.setText("");
-                Toast.makeText(getApplicationContext(), "Item was added", Toast.LENGTH_SHORT).show();
-                saveItems();
+                onAddClick();
             }
         });
     }
 
-    // handle the result of the edit activity
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (resultCode == RESULT_OK && requestCode == EDIT_TEXT_CODE) {
-            // Retrieve the updated text value
-            String itemText = data.getStringExtra(KEY_ITEM_TEXT);
-            // extract the original position of the edited item from the position key
-            int position = data.getExtras().getInt(KEY_ITEM_POSITION);
+    private void onAddClick() {
+        // build an alert dialog & prompt user to input new task
+        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        final View addView = getLayoutInflater().inflate(R.layout.fragment_add_dialog, null);
+        builder.setView(addView);
 
-            // update the model at the right position with new item text
-            items.set(position, itemText);
-            // notify the adapter
-            itemsAdapter.notifyItemChanged(position);
-            // persist the changes
-            saveItems();
-            Toast.makeText(getApplicationContext(), "Item updated successfully", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            Log.w("MainActivity", "Unknown call to onActivityResult");
-        }
+        final EditText edtTask = addView.findViewById(R.id.edtTask);
+
+        builder.setPositiveButton("Enter", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.i(TAG, "Added!");
+                // add text in field as task
+                String task = edtTask.getText().toString();
+                // Add item to the model
+                items.add(task);
+                // Notify the adapter that an item is inserted
+                itemsAdapter.notifyItemInserted(items.size() - 1);
+                Toast.makeText(getApplicationContext(), "Item was added", Toast.LENGTH_SHORT).show();
+                saveItems();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getApplicationContext(), "Canceled!", Toast.LENGTH_SHORT).show();
+                dialog.cancel();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void onEditClick(final int position, String text) {
+        // build an alert dialog & prompt user to change current text
+        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        final View editView = getLayoutInflater().inflate(R.layout.fragment_edit_dialog, null);
+        builder.setView(editView);
+
+        final EditText edtTask = editView.findViewById(R.id.edtTask);
+        edtTask.setText(text);
+
+        builder.setPositiveButton("Enter", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.i("MainAct", "Added!");
+                // add text in field as task
+                String task = edtTask.getText().toString();
+                // Edit item
+                items.set(position, task);
+                // notify the adapter
+                itemsAdapter.notifyItemChanged(position);
+                // persist the changes
+                saveItems();
+                Toast.makeText(getApplicationContext(), "Item updated successfully", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getApplicationContext(), "Canceled!", Toast.LENGTH_SHORT).show();
+                dialog.cancel();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void remove(int position) {
+        // Delete the item from the model
+        items.remove(position);
+        // Notify the adapter
+        itemsAdapter.notifyItemRemoved(position);
+        saveItems();
     }
 
     private File getDataFile() {
@@ -121,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             items = new ArrayList<>(FileUtils.readLines(getDataFile(), Charset.defaultCharset()));
         } catch (IOException e) {
-            Log.e("MainActivity", "Error reading items", e);
+            Log.e(TAG, "Error reading items", e);
             items = new ArrayList<>();
         }
     }
@@ -131,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             FileUtils.writeLines(getDataFile(), items);
         } catch (IOException e) {
-            Log.e("MainActivity", "Error writing items", e);
+            Log.e(TAG, "Error writing items", e);
         }
     }
 }
