@@ -1,46 +1,19 @@
-# Project 1 - *Simple Todo*
+# A simple to-do list
 
-**Simple Todo** is an android app that allows building a todo list and basic todo items management functionality including adding new items, editing and deleting an existing item.
+<img src='https://i.imgur.com/fWOdYQN.gif' align='right' title='Video Walkthrough' width='300' alt='Video Walkthrough' />
 
-Submitted by: **Julia Nguyen**
+An Android app that allows for basic task management.
 
-Time spent: **8** hours spent in total
+## Features
 
-## User Stories
-
-The following **required** functionality is completed:
-
-* [x] User can **view a list of todo items**
-* [x] User can **successfully add and remove items** from the todo list
-* [x] User's **list of items persisted** upon modification and and retrieved properly on app restart
-
-The following **optional** features are implemented:
-
-* [x] User can **tap a todo item in the list and bring up an edit screen for the todo item** and then have any changes to the text reflected in the todo list
-
-The following **additional** features are implemented:
-
-* [ ] List anything else that you can get done to improve the app functionality!
-
-## Video Walkthrough
-
-Here's a walkthrough of implemented user stories:
-
-<img src='walkthrough.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
-
-GIF created with [LiceCap](http://www.cockos.com/licecap/).
-
-## Notes
-
-Describe any challenges encountered while building the app.
-
-The biggest challenge for me was understanding how exactly each component of the application interacted with each other. For instance, I understand the general function of the Adapter and View, but it is difficult to wrap my head around how exactly the adapter connects the data model to view. I will need to review this on my own time.
-
-Additionally, getting familiar with Android Studio and its integrated tools/libraries has been overwhelming, but not impossible. I understand the basics of Java object oriented programming but this application definitely takes the difficulty up a level with all of the program components interacting with each other in complicated ways.
+* View a list of todo items
+* Add tasks
+* Upon item click, choose to complete, edit, or delete selected task
+* All changes made are locally persisted/saved
 
 ## License
 
-    Copyright [yyyy] [name of copyright owner]
+    Copyright [2019] [Julia Nguyen]
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
