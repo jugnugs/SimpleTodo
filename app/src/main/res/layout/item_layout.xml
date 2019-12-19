@@ -11,6 +11,8 @@
         style="@style/CustomCheckBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="0dp"
+        android:layout_toStartOf="@+id/btnDone"
         android:checked="false"
         android:textColor="@color/primaryText"
         android:textSize="16sp"
